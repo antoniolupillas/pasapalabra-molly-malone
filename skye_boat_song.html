@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pasapalabra – Skye Boat Song & Proverbs</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #05080f;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#game-root {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.screen { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.hidden { display: none !important; }
+
+/* ---- START ---- */
+.start-bg {
+  background: radial-gradient(ellipse at 50% 0%, #0d1a3a 0%, #05080f 70%);
+  border: 1px solid #1a3060;
+  border-radius: 16px;
+  padding: 40px 30px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.game-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #5bf0d0;
+  text-shadow: 0 0 28px #5bf0d088, 0 0 60px #5bf0d033;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.game-subtitle {
+  font-size: 0.82rem;
+  color: #6699bb;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.song-title {
+  font-size: 1rem;
+  color: #88ccff;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  font-style: italic;
+  text-align: center;
+}
+.topic-badge {
+  background: #0a1428;
+  border: 1px solid #1a3a60;
+  border-radius: 10px;
+  padding: 16px 22px;
+  font-size: 0.8rem;
+  color: #88aacc;
+  text-align: left;
+  max-width: 500px;
+  margin-bottom: 30px;
+  line-height: 1.8;
+  width: 100%;
+}
+.topic-badge .section-label {
+  color: #5bf0d0;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 4px;
+}
+.topic-badge .item { color: #aabbcc; }
+.btn-main {
+  background: linear-gradient(135deg, #0d4a7a, #0a8a6a);
+  color: #fff;
+  border: none;
+  border-radius: 32px;
+  padding: 15px 56px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 3px;
+  box-shadow: 0 0 28px #0a8a6a66;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.btn-main:hover { transform: scale(1.05); box-shadow: 0 0 44px #5bf0d088; }
+
+/* ---- TOP BAR ---- */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.score-box {
+  background: #080f1e;
+  border: 1px solid #1a3060;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.72rem;
+  color: #5577aa;
+  text-align: center;
+  flex: 1;
+  letter-spacing: 1px;
+}
+.score-box .val { font-size: 1.4rem; font-weight: 700; color: #5bf0d0; display: block; margin-top: 2px; }
+.timer-box {
+  background: #080f1e;
+  border: 2px solid #1a4a70;
+  border-radius: 10px;
+  padding: 8px 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5bf0d0;
+  min-width: 108px;
+  text-align: center;
+  letter-spacing: 3px;
+  flex: 0 0 auto;
+  text-shadow: 0 0 12px #5bf0d066;
+}
+.timer-box.urgent { color: #ff4455; border-color: #ff4455; text-shadow: 0 0 12px #ff445566; animation: blink 0.5s infinite alternate; }
+@keyframes blink { from {opacity:1;} to {opacity:0.3;} }
+
+/* ---- ROSCO ---- */
+#rosco-canvas { display: block; margin: 0 auto; }
+
+/* ---- QUESTION ---- */
+.question-panel {
+  background: #080f1e;
+  border: 1px solid #1a3a60;
+  border-radius: 10px;
+  padding: 14px 20px;
+  width: 100%;
+  min-height: 76px;
+  margin-bottom: 10px;
+}
+.q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+.q-letter {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #5bf0d0;
+  text-shadow: 0 0 14px #5bf0d066;
+  line-height: 1;
+}
+.q-label { font-size: 0.65rem; color: #334466; letter-spacing: 2px; }
+.q-text { font-size: 0.83rem; color: #99bbdd; line-height: 1.55; }
+
+/* ---- INPUT ---- */
+.input-area { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
+#answer-input {
+  flex: 1;
+  background: #080f1e;
+  border: 1.5px solid #1a3a60;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  padding: 11px 16px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Segoe UI', sans-serif;
+}
+#answer-input:focus { border-color: #5bf0d0; box-shadow: 0 0 10px #5bf0d033; }
+.btn-send, .btn-pass {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: transform 0.1s;
+  font-family: 'Segoe UI', sans-serif;
+  white-space: nowrap;
+}
+.btn-send { background: #0d6a5a; color: #5bf0d0; border: 1px solid #0a8a6a; }
+.btn-send:hover { background: #0a8a6a; transform: scale(1.03); }
+.btn-pass { background: #0a1428; color: #5577aa; border: 1px solid #1a3060; }
+.btn-pass:hover { background: #0f1f3a; transform: scale(1.03); }
+.key-hint { font-size: 0.58rem; opacity: 0.55; display: block; text-align: center; margin-top: 2px; font-weight: 400; }
+
+/* ---- STATUS ---- */
+.status-row {
+  display: flex; gap: 14px; font-size: 0.7rem; color: #334466;
+  flex-wrap: wrap; justify-content: center;
+}
+.status-item { display: flex; align-items: center; gap: 5px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-g { background: #44ee88; }
+.dot-r { background: #ff4455; }
+.dot-y { background: #5bf0d0; box-shadow: 0 0 6px #5bf0d088; }
+.dot-b { background: #0f2040; border: 1px solid #1a3a60; }
+
+/* ---- FEEDBACK ---- */
+#feedback {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: #0a2a1a;
+  border: 1.5px solid #44ee88;
+  border-radius: 8px;
+  padding: 10px 26px;
+  font-size: 0.9rem;
+  color: #44ee88;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 999;
+}
+#feedback.wrong { background: #2a0a0a; border-color: #ff4455; color: #ff4455; }
+#feedback.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+/* ---- END ---- */
+.end-bg {
+  background: radial-gradient(ellipse at 50% 0%, #0d1a3a 0%, #05080f 70%);
+  border: 1px solid #1a3060;
+  border-radius: 16px;
+  padding: 40px 30px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.end-title { font-size: 2rem; font-weight: 700; color: #5bf0d0; text-align: center; margin-bottom: 8px; text-shadow: 0 0 20px #5bf0d066; }
+.end-msg { color: #88aacc; font-size: 0.88rem; margin-bottom: 26px; text-align: center; max-width: 460px; line-height: 1.65; }
+.end-grid { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+.end-card {
+  background: #080f1e;
+  border: 1px solid #1a3060;
+  border-radius: 10px;
+  padding: 14px 22px;
+  text-align: center;
+  min-width: 110px;
+}
+.ec-label { font-size: 0.62rem; letter-spacing: 1.5px; color: #334466; }
+.ec-val { font-size: 2rem; font-weight: 700; margin-top: 4px; }
+.ec-g { color: #44ee88; } .ec-r { color: #ff4455; }
+.ec-y { color: #5bf0d0; } .ec-b { color: #6699ff; }
+</style>
+</head>
+<body>
+<div id="feedback"></div>
+<div id="game-root">
+
+  <!-- START -->
+  <div id="start-screen" class="screen">
+    <div class="start-bg">
+      <div class="game-title">⛵ PASAPALABRA</div>
+      <div class="game-subtitle">ENGLISH PROVERBS &amp; EXPRESSIONS</div>
+      <div class="song-title">♪ The Skye Boat Song ♪</div>
+      <div class="topic-badge">
+        <span class="section-label">PROVERBS</span>
+        <span class="item">· East or West, Home is Best</span><br>
+        <span class="item">· A Rolling Stone Gathers No Moss</span><br>
+        <span class="item">· Where There's a Will, There's a Way</span><br>
+        <span class="item">· Little by Little, a Little Becomes a Lot</span><br><br>
+        <span class="section-label">EXPRESSIONS</span>
+        <span class="item">· Go the Extra Mile</span><br>
+        <span class="item">· Take the Road Less Travelled</span><br>
+        <span class="item">· Follow Your Heart</span><br>
+        <span class="item">· Keep Your Eyes on the Prize</span>
+      </div>
+      <button class="btn-main" onclick="startGame()">⚓ JUGAR</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game-screen" class="screen hidden">
+    <div class="top-bar">
+      <div class="score-box">CORRECTAS<span class="val" id="sc-correct">0</span></div>
+      <div class="timer-box" id="timer-display">10:00</div>
+      <div class="score-box">FALLADAS<span class="val" id="sc-wrong">0</span></div>
+    </div>
+    <canvas id="rosco-canvas" width="370" height="370"></canvas>
+    <div class="question-panel">
+      <div class="q-header">
+        <div class="q-letter" id="q-letter">A</div>
+        <div class="q-label">CON ESTA LETRA</div>
+      </div>
+      <div class="q-text" id="q-text">Cargando…</div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="answer-input" placeholder="Escribe tu respuesta…" autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button class="btn-send" onclick="submitAnswer()">ENVIAR<span class="key-hint">↵ Enter</span></button>
+      <button class="btn-pass" onclick="passQuestion()">PASAPALABRA<span class="key-hint">Espacio</span></button>
+    </div>
+    <div class="status-row">
+      <div class="status-item"><span class="dot dot-g"></span> Correcta</div>
+      <div class="status-item"><span class="dot dot-r"></span> Incorrecta</div>
+      <div class="status-item"><span class="dot dot-y"></span> Activa</div>
+      <div class="status-item"><span class="dot dot-b"></span> Pendiente/Pasada</div>
+      <div class="status-item">Pasadas: <strong id="sc-passed">0</strong></div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="end-screen" class="screen hidden">
+    <div class="end-bg">
+      <div class="end-title" id="end-title">¡Fin del rosco!</div>
+      <div class="end-msg" id="end-msg"></div>
+      <div class="end-grid">
+        <div class="end-card"><div class="ec-label">CORRECTAS</div><div class="ec-val ec-g" id="end-correct">0</div></div>
+        <div class="end-card"><div class="ec-label">FALLADAS</div><div class="ec-val ec-r" id="end-wrong">0</div></div>
+        <div class="end-card"><div class="ec-label">PASADAS</div><div class="ec-val ec-y" id="end-passed">0</div></div>
+        <div class="end-card"><div class="ec-label">TIEMPO</div><div class="ec-val ec-b" id="end-time">0:00</div></div>
+      </div>
+      <button class="btn-main" onclick="startGame()">🔄 JUGAR DE NUEVO</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    letter: 'A',
+    answer: 'ADVENTURE',
+    clue: 'Con A: En "Take the Road Less Travelled", cada viaje comienza con el espíritu de ___. Es la búsqueda de experiencias nuevas e inesperadas, como el protagonista de la Skye Boat Song huyendo hacia las Highlands.'
+  },
+  {
+    letter: 'B',
+    answer: 'BEST',
+    clue: 'Con B: "East or West, Home is ___" — superlativo de "good". No importa cuánto viajes, tu hogar siempre supera a cualquier otro lugar del mundo.'
+  },
+  {
+    letter: 'C',
+    answer: 'COURAGE',
+    clue: 'Con C: La virtud que impulsa a "Follow Your Heart" y a "Go the Extra Mile". Bonnie Prince Charlie necesitó mucho ___ para cruzar el mar hacia Skye en medio de la tormenta.'
+  },
+  {
+    letter: 'D',
+    answer: 'DESTINATION',
+    clue: 'Con D: Lugar al que se llega al final del viaje. En la Skye Boat Song, la isla de Skye es la ___ del príncipe fugitivo. "Keep Your Eyes on the Prize" significa nunca perder de vista tu ___.'
+  },
+  {
+    letter: 'E',
+    answer: 'EXTRA',
+    clue: 'Con E: "Go the ___ Mile" — adjetivo que significa adicional o superior a lo esperado. Dar ese esfuerzo adicional es lo que distingue a quien alcanza sus metas.'
+  },
+  {
+    letter: 'F',
+    answer: 'FOLLOW',
+    clue: 'Con F: "___ Your Heart" — verbo que significa seguir o ir detrás de algo. La expresión anima a guiarse por los propios deseos y pasiones en lugar de las expectativas ajenas.'
+  },
+  {
+    letter: 'G',
+    answer: 'GATHERS',
+    clue: 'Con G: "A Rolling Stone ___ No Moss" — tercera persona singular de "to gather", que significa recolectar o acumular. Una persona que nunca se asienta no acumula riquezas ni raíces.'
+  },
+  {
+    letter: 'H',
+    answer: 'HEART',
+    clue: 'Con H: "Follow Your ___" — órgano vital que en sentido figurado representa las emociones, deseos y la intuición más profunda. Guiarse por él significa actuar con autenticidad.'
+  },
+  {
+    letter: 'I',
+    answer: 'ISLE',
+    clue: 'Con I: La Skye Boat Song habla de cruzar el mar hasta una ___. Skye es una ___ escocesa. "Take the Road Less Travelled" invita a explorar rincones remotos como este.'
+  },
+  {
+    letter: 'J',
+    answer: 'JOURNEY',
+    clue: 'Con J: La Skye Boat Song narra el ___ de Bonnie Prince Charlie a través del mar. "Take the Road Less Travelled" anima a hacer de cada ___ una experiencia única y personal.'
+  },
+  {
+    letter: 'K',
+    answer: 'KEEP',
+    clue: 'Con K: "___ Your Eyes on the Prize" — verbo que significa mantener o conservar. La expresión anima a no distraerse y mantener la concentración en el objetivo final.'
+  },
+  {
+    letter: 'L',
+    answer: 'LITTLE',
+    clue: 'Con L: "___ by Little, a Little Becomes a Lot" — adjetivo que significa pequeño. El proverbio enseña que los avances pequeños y constantes acaban acumulando grandes resultados.'
+  },
+  {
+    letter: 'M',
+    answer: 'MILE',
+    clue: 'Con M: "Go the Extra ___" — unidad de distancia anglosajona equivalente a 1,6 km. En sentido figurado, hacer esa ___ adicional significa esforzarse más de lo necesario.'
+  },
+  {
+    letter: 'N',
+    answer: 'MOSS',
+    clue: 'Con N: No, esta respuesta empieza diferente. "A Rolling Stone Gathers No ___" — planta sin raíces que crece sobre superficies húmedas. La piedra en movimiento nunca la acumula.'
+  },
+  {
+    letter: 'O',
+    answer: 'OVER',
+    clue: 'Con O: En la Skye Boat Song, "Speed, bonnie boat, like a bird on the wing, ___ the sea to Skye". Preposición que indica movimiento por encima o a través de algo.'
+  },
+  {
+    letter: 'P',
+    answer: 'PRIZE',
+    clue: 'Con P: "Keep Your Eyes on the ___" — recompensa, trofeo u objetivo final que se desea alcanzar. Mantener la vista en él evita las distracciones del camino.'
+  },
+  {
+    letter: 'R',
+    answer: 'ROAD',
+    clue: 'Con R: "Take the ___ Less Travelled" — camino o vía por donde se avanza. Elegir el ___ menos transitado simboliza tomar decisiones originales e independientes.'
+  },
+  {
+    letter: 'S',
+    answer: 'STONE',
+    clue: 'Con S: "A Rolling ___ Gathers No Moss" — roca o piedra. Que esté "rolling" (rodando) significa que está siempre en movimiento, sin asentarse en ningún lugar.'
+  },
+  {
+    letter: 'T',
+    answer: 'TRAVELLED',
+    clue: 'Con T: "Take the Road Less ___" — participio pasado del verbo "to travel". Un camino poco ___ es uno que pocas personas han recorrido; simboliza originalidad y valentía.'
+  },
+  {
+    letter: 'U',
+    answer: 'UNITY',
+    clue: 'Con U: La Skye Boat Song es un himno de ___ y lealtad del pueblo escocés hacia su príncipe. "Where There\'s a Will, There\'s a Way" requiere ___ de propósito para superar obstáculos.'
+  },
+  {
+    letter: 'V',
+    answer: 'VOYAGE',
+    clue: 'Con V: La Skye Boat Song describe el ___ de Bonnie Prince Charlie a través de las aguas tormentosas. Un ___ es un viaje largo, generalmente por mar, lleno de desafíos.'
+  },
+  {
+    letter: 'W',
+    answer: 'WILL',
+    clue: 'Con W: "Where There\'s a ___, There\'s a Way" — sustantivo que significa voluntad, determinación o deseo fuerte. Si tienes suficiente ___ para lograr algo, siempre encontrarás la manera.'
+  },
+  {
+    letter: 'X',
+    answer: null,
+    clue: null
+  },
+  {
+    letter: 'Y',
+    answer: 'EYES',
+    clue: 'Con Y: No, espera. La respuesta es correcta para E. Pasamos a Y: "Keep Your ___" is not starting with Y. Respuesta: YEARNING — el anhelo profundo que siente el exiliado en la Skye Boat Song por regresar a su tierra, similar al proverbio "East or West, Home is Best".'
+  },
+  {
+    letter: 'Z',
+    answer: null,
+    clue: null
+  },
+];
+
+// Fix Y entry properly
+QUESTIONS[23] = {
+  letter: 'Y',
+  answer: 'YEARNING',
+  clue: 'Con Y: El anhelo o nostalgia profunda que siente el exiliado en la Skye Boat Song por regresar a casa. Este sentimiento está en el corazón del proverbio "East or West, Home is Best": siempre hay un ___ por el hogar.'
+};
+
+// Replace N (Moss starts with M, not N) - fix that entry
+QUESTIONS[13] = {
+  letter: 'N',
+  answer: 'NOSTALGIA',
+  clue: 'Con N: La ___ es el sentimiento central de la Skye Boat Song: añoranza por el hogar y por tiempos mejores. "East or West, Home is Best" es el proverbio que mejor expresa este sentimiento de melancolía por el lugar de origen.'
+};
+
+let state = {};
+let timerInterval = null;
+let canvas, ctx;
+
+function startGame() {
+  clearInterval(timerInterval);
+  state = {
+    questions: QUESTIONS.map(q => ({ ...q, status: q.answer ? 'pending' : 'skip' })),
+    activeIndex: 0,
+    correct: 0, wrong: 0, passed: 0,
+    timeLeft: 600,
+    started: true,
+  };
+  state.activeIndex = findNext(state, -1, 1);
+  showScreen('game');
+  canvas = document.getElementById('rosco-canvas');
+  ctx = canvas.getContext('2d');
+  drawRosco();
+  showQuestion();
+  updateScores();
+  timerInterval = setInterval(tick, 1000);
+  setTimeout(() => document.getElementById('answer-input').focus(), 100);
+}
+
+function findNext(s, from, dir) {
+  let idx = from;
+  for (let i = 0; i < s.questions.length; i++) {
+    idx = (idx + dir + s.questions.length) % s.questions.length;
+    const st = s.questions[idx].status;
+    if (st === 'pending' || st === 'passed') return idx;
+  }
+  return -1;
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+  document.getElementById(name + '-screen').classList.remove('hidden');
+}
+
+function tick() {
+  state.timeLeft--;
+  const m = Math.floor(state.timeLeft / 60).toString().padStart(2,'0');
+  const s = (state.timeLeft % 60).toString().padStart(2,'0');
+  const d = document.getElementById('timer-display');
+  d.textContent = m + ':' + s;
+  d.classList.toggle('urgent', state.timeLeft <= 30);
+  if (state.timeLeft <= 0) endGame('time');
+}
+
+function submitAnswer() {
+  const inp = document.getElementById('answer-input');
+  const val = inp.value.trim().toUpperCase();
+  if (!val) return;
+  const q = state.questions[state.activeIndex];
+  if (!q || q.status === 'skip') return;
+  const correct = val === q.answer.toUpperCase();
+  q.status = correct ? 'correct' : 'wrong';
+  if (correct) state.correct++; else state.wrong++;
+  inp.value = '';
+  showFeedback(correct, q.answer);
+  advance();
+}
+
+function passQuestion() {
+  const q = state.questions[state.activeIndex];
+  if (!q || q.status === 'skip') return;
+  if (q.status === 'pending') { q.status = 'passed'; state.passed++; }
+  document.getElementById('answer-input').value = '';
+  advance();
+}
+
+function advance() {
+  updateScores();
+  drawRosco();
+  const remaining = state.questions.filter(q => q.status === 'pending' || q.status === 'passed').length;
+  if (remaining === 0) { endGame('done'); return; }
+  state.activeIndex = findNext(state, state.activeIndex, 1);
+  showQuestion();
+  document.getElementById('answer-input').focus();
+}
+
+function showQuestion() {
+  const q = state.questions[state.activeIndex];
+  if (!q) return;
+  document.getElementById('q-letter').textContent = q.letter;
+  document.getElementById('q-text').textContent = q.clue || '';
+}
+
+function updateScores() {
+  document.getElementById('sc-correct').textContent = state.correct;
+  document.getElementById('sc-wrong').textContent = state.wrong;
+  document.getElementById('sc-passed').textContent = state.passed;
+}
+
+function showFeedback(ok, answer) {
+  const fb = document.getElementById('feedback');
+  fb.textContent = ok ? '✓ ¡CORRECTO!' : '✗  Era: ' + answer;
+  fb.className = ok ? 'show' : 'wrong show';
+  clearTimeout(fb._t);
+  fb._t = setTimeout(() => { fb.className = ok ? '' : 'wrong'; }, 1400);
+}
+
+function drawRosco() {
+  const W = 370, H = 370;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2, R = 158;
+
+  // outer glow ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, R + 10, 0, Math.PI*2);
+  ctx.strokeStyle = '#0a2a3a';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  const validQ = state.questions.filter(q => q.status !== 'skip');
+  const total = validQ.length;
+
+  validQ.forEach((q, i) => {
+    const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + R * Math.cos(angle);
+    const y = cy + R * Math.sin(angle);
+    const isActive = (state.questions[state.activeIndex] === q);
+
+    let bg = '#080f20', textColor = '#334466', border = '#0f1e3a', bw = 1.5;
+    if (q.status === 'correct')      { bg = '#052218'; textColor = '#44ee88'; border = '#44ee88'; bw = 2; }
+    else if (q.status === 'wrong')   { bg = '#220510'; textColor = '#ff4455'; border = '#ff4455'; bw = 2; }
+    else if (q.status === 'passed')  { bg = '#0f1a10'; textColor = '#aaeebb'; border = '#33aa55'; bw = 1.5; }
+    if (isActive) { bg = '#0d3a5a'; textColor = '#5bf0d0'; border = '#5bf0d0'; bw = 3; }
+
+    const r = 17;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = bg;
+    ctx.fill();
+    ctx.strokeStyle = border;
+    ctx.lineWidth = bw;
+    ctx.stroke();
+
+    if (isActive) {
+      ctx.beginPath();
+      ctx.arc(x, y, r + 6, 0, Math.PI*2);
+      ctx.strokeStyle = '#5bf0d033';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = textColor;
+    ctx.font = isActive ? 'bold 14px sans-serif' : '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(q.letter, x, y);
+  });
+
+  // centre text
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#5bf0d0';
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillText('PASAPALABRA', cx, cy - 22);
+  ctx.fillStyle = '#336688';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('⛵ Skye Boat Song', cx, cy - 4);
+  ctx.fillStyle = '#1a3a50';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('Proverbs & Expressions', cx, cy + 13);
+}
+
+function endGame(reason) {
+  clearInterval(timerInterval);
+  const elapsed = 600 - state.timeLeft;
+  const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s = (elapsed%60).toString().padStart(2,'0');
+  document.getElementById('end-correct').textContent = state.correct;
+  document.getElementById('end-wrong').textContent = state.wrong;
+  document.getElementById('end-passed').textContent = state.passed;
+  document.getElementById('end-time').textContent = m + ':' + s;
+
+  const total = QUESTIONS.filter(q => q.answer).length;
+  const pct = Math.round((state.correct / total) * 100);
+  let title = '¡Fin del rosco!', msg = '';
+
+  if (state.correct === total) {
+    title = '🏆 ¡ROSCO COMPLETADO!';
+    msg = '¡Perfecto! Has acertado todas las letras. Eres un auténtico experto en los proverbios y expresiones de la Skye Boat Song. ¡Speed, bonnie boat!';
+  } else if (pct >= 75) {
+    title = '⭐ ¡Muy bien hecho!';
+    msg = `Has acertado el ${pct}% del rosco. Excelente conocimiento de los proverbios y las expresiones escocesas. Follow your heart y sigue estudiando.`;
+  } else if (pct >= 50) {
+    title = '👍 ¡Buen resultado!';
+    msg = `${pct}% de aciertos. Repasa los proverbios: Rolling Stone, Extra Mile y Road Less Travelled. Little by little, a little becomes a lot.`;
+  } else {
+    title = '⛵ ¡Sigue navegando!';
+    msg = `${pct}% de aciertos. Where there's a will, there's a way. Repasa los proverbios de la Skye Boat Song y vuelve a intentarlo.`;
+  }
+
+  if (reason === 'time') {
+    title = '⏱ ¡Tiempo agotado!';
+    msg = 'Se acabó el tiempo antes de completar el rosco. ' + msg;
+  }
+
+  document.getElementById('end-title').textContent = title;
+  document.getElementById('end-msg').textContent = msg;
+  showScreen('end');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (!state.started) return;
+  const gameVisible = !document.getElementById('game-screen').classList.contains('hidden');
+  if (!gameVisible) return;
+  if (e.key === 'Enter') { e.preventDefault(); submitAnswer(); }
+  if (e.key === ' ') {
+    const inp = document.getElementById('answer-input');
+    if (document.activeElement !== inp || inp.value === '') { e.preventDefault(); passQuestion(); }
+  }
+});
+</script>
+</body>
+</html>
